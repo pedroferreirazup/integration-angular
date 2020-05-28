@@ -8,7 +8,7 @@ jobs:
         node-version: [12.x]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@master
 
       - name: Cache node modules
         uses: actions/cache@v1
@@ -25,3 +25,7 @@ jobs:
         run: |
           npm i
           npm run build:prod
+
+      - name: All Testes
+        run: npm run test
+      
