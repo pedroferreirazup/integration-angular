@@ -1,43 +1,39 @@
-name: Auto-publish
-push:
-    branches:
-      - master
+on: push
+name: Angular Build
 jobs:
   build:
-
-  publish:
-    name: Publish to NPM & GitHub Package Registry
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'master') # Publish it only if the push comes from the master branch
-    needs: build # We need to wait for the build to be committed before publishing
+    strategy:
+      matrix:
+        node-version: [12.x]
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@master
+
+      - name: Cache node modules
+        uses: actions/cache@v1
         with:
-          ref: master
-
-      - name: Check version changes
-        uses: integration-angular/version-check@v1
-        id: check
-
-      - name: Version update detected
-        if: steps.check.outputs.changed == 'true'
-        run: 'echo "Version change found! New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"'
-
-      - name: Install dependencies
-        if: steps.check.outputs.changed == 'true'
-        run: npm install --only=prod
-
-      - name: Set up Node.js for GPR
-        if: steps.check.outputs.changed == 'true'
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Setup Node ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
-          registry-url: "https://npm.pkg.github.com/"
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://npm.pkg.github.com'
           scope: "@pedroferreirazup"
 
-      - name: Publish package to GPR
-        if: steps.check.outputs.changed == 'true'
+      - name: Install dependencies
+        run:  npm ci
+      
+      - name: npm run build
+        run: npm run build:prod
+
+      - name: Package
+        run: npm run pack
+    
+      - name: npm publish
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
