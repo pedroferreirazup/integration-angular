@@ -1,8 +1,9 @@
 name: Auto-publish
-on: push
-
+push:
+    branches:
+      - master
 jobs:
-  build: ... # If your package needs to be built, you can put that process here, so that it stays constantly updated
+  build:
 
   publish:
     name: Publish to NPM & GitHub Package Registry
