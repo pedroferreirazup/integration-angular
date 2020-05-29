@@ -1,20 +1,28 @@
 on: push
 name: Angular Build
 jobs:
-  build:
+  release:
+    name: Publish Package
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - name: Checkout
+        uses: actions/checkout@v2
 
+      # Use this GitHub Action
       - name: Check package version
         uses: technote-space/package-version-check-action@v1
         with:
           COMMIT_DISABLED: 1
-    
+
       - name: Install Package dependencies
+        run: npm ci
+        
+      - name: Build
+        run: npm run build:prod
+
       - name: Publish
         run: |
           npm config set //npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN
           npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
