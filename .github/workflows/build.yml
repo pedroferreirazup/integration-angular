@@ -10,34 +10,23 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - name: Cache node modules
-        uses: actions/cache@v1
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-            
-      - name: Node ${{ matrix.node-version }}
+      - name: Setup Node
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
-          registry-url: https://npm.pkg.github.com/
-          scope: '@pedroferreirazup'
-
-      - name: npm install and npm run build
+          node-version: "13.x"
+      - name: Install dependencies
         run: |
-          npm i
-          npm run build:prod
+          echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
+          npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
 
-      - name: All Testes
-        run: npm run test
-      
+      - name: npm run build
+        run: npm run build:prod
+
       - name: Package
         run: npm run pack
 
-      - run: echo "registry=https://npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
-
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: All Testes
+        run: npm run test
+    
