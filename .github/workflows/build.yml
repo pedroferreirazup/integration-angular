@@ -10,10 +10,12 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - name: Setup Node
+      - name: Setup Node Node ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
-          node-version: "13.x"
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://npm.pkg.github.com'
+          scope: "@pedroferreirazup"
       - name: Install dependencies
         run: |
           echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
