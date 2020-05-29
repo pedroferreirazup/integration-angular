@@ -1,26 +1,42 @@
+name: Auto-publish
 on: push
-name: Angular Build
+
 jobs:
-  release:
-    name: Publish Package
+  build: ... # If your package needs to be built, you can put that process here, so that it stays constantly updated
+
+  publish:
+    name: Publish to NPM & GitHub Package Registry
     runs-on: ubuntu-latest
+    if: contains(github.ref, 'master') # Publish it only if the push comes from the master branch
+    needs: build # We need to wait for the build to be committed before publishing
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v2
-
-      # Use this GitHub Action
-      - name: Check package version
-        uses: integration-angular/package-version-check-action@v1
         with:
-          COMMIT_DISABLED: 1
+          ref: master
 
-      - name: Install Package dependencies
-        run: npm ci
+      - name: Check version changes
+        uses: integration-angular/version-check@v1
+        id: check
 
-      - name: Build
-        run: npm run build:prod
+      - name: Version update detected
+        if: steps.check.outputs.changed == 'true'
+        run: 'echo "Version change found! New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"'
 
-      - name: Publish
+      - name: Install dependencies
+        if: steps.check.outputs.changed == 'true'
+        run: npm install --only=prod
+
+      - name: Set up Node.js for GPR
+        if: steps.check.outputs.changed == 'true'
+        uses: actions/setup-node@v1
+        with:
+          registry-url: "https://npm.pkg.github.com/"
+          scope: "@pedroferreirazup"
+
+      - name: Publish package to GPR
+        if: steps.check.outputs.changed == 'true'
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

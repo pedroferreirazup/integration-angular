@@ -12,9 +12,6 @@
     "pack": "cd dist/button && npm pack"
   },
   "private": false,
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@pedroferreirazup"
-  },
   "repository" : {
     "type" : "git",
     "url": "git+https://github.com/pedroferreirazup/integration-angular.git"
