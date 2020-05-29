@@ -4,7 +4,7 @@ import { Component, OnInit } from '@angular/core';
   selector: 'ui-button',
   template: `
     <p>
-      button works!
+      button works!!!
     </p>
   `,
   styles: [
