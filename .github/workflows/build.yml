@@ -3,14 +3,9 @@ name: Angular Build
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [12.x]
-
     steps:
       - uses: actions/checkout@master
 
-       # Use this GitHub Action
       - name: Check package version
         uses: technote-space/package-version-check-action@v1
         with:
